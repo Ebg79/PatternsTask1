@@ -9,9 +9,13 @@ branches:
 build: off  # будем использовать свой скрипт сборки
 
 install:
-  # запускаем SUT (& означает, что в фоновом режиме не блокируем терминал для запуска тестов)
-  - java -jar ./artifacts/app-card-delivery.jar &
+  - chmod +x gradlew
+  # запускаем SUT (запоминаем информацию о процессе в переменной $App)
+  - ps: $App = Start-Process -FilePath java -ArgumentList "-jar ./artifacts/app-card-delivery.jar" -PassThru
 
 build_script:
-  - chmod +x gradlew
-  - ./gradlew test --info -Dselenide.headless=true # запускаем тест, флаг --info позволяет выводить больше информации
+  - ./gradlew test --info "-Dselenide.headless=true"
+
+
+on_finish:
+  - ps: Stop-Process -Id $App.Id  # оставливаем SUT
